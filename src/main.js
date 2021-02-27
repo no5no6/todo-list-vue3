@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import Index from '@/pages/home/'
 import installElementPlus from './plugins/element'
 
-const app = createApp(App)
+const app = createApp(Index)
 installElementPlus(app)
 app.mount('#app')
