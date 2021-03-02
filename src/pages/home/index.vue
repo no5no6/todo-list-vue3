@@ -25,7 +25,7 @@
           <el-card class="box-card">
             <ul class="tasks">
               <li class="task" v-for="(task, index) in tasks" :key="index" >
-                <span style="flex: 1;text-align: left">
+                <span style="flex: 1;text-align: left" :class="{'finish-line': task.checked}">
                   <el-input
                     v-model="task.text"
                     v-if="editStatus"
@@ -37,7 +37,7 @@
                 <span>
                   <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;"></i>
                   <i class="icon el-icon-delete-solid" style="margin-right: 15px; cursor: pointer;font-size:20px;" ></i>
-                  <i v-show="!task.checked" class="icon el-icon-check" style="cursor: pointer;font-size:20px;" ></i>
+                  <i v-show="!task.checked" class="icon el-icon-check" style="cursor: pointer;font-size:20px;" @click="updateTaskStatus(task)"></i>
                 </span>
               </li>
             </ul>
@@ -56,7 +56,7 @@ import { ref, reactive } from 'vue'
 
 import { getItem } from '@/utils/storage'
 
-// 1. 添加待办事项
+// 添加待办事项
 const add = tasks => {
   let input = ref('')
   
@@ -77,6 +77,25 @@ const add = tasks => {
   }
 }
 
+// 更新待办事项
+const update = tasks => {
+
+  const sortTasks = () => {
+    tasks.sort((a) => a.checked ? 1 : -1)
+  }
+  
+  const updateTaskStatus = task => {
+    task.checked = !task.checked
+    sortTasks()
+    console.log(tasks, 'toototototot')
+  }
+
+  return {
+    updateTaskStatus
+  }
+}
+
+
 export default {
   name: 'Index',
   setup() {
@@ -88,7 +107,8 @@ export default {
     return {
       tasks,
       editStatus,
-      ...add(tasks)
+      ...add(tasks),
+      ...update(tasks)
     }
   },
   directives: {
@@ -140,5 +160,9 @@ export default {
 
 .icon:hover {
   color: #409EFF
+}
+
+.finish-line {
+  text-decoration: line-through;
 }
 </style>
