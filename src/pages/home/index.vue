@@ -27,16 +27,16 @@
               <li class="task" v-for="(task, index) in tasks" :key="index" >
                 <span style="flex: 1;text-align: left" :class="{'finish-line': task.checked}">
                   <el-input
-                    v-model="task.text"
+                    v-model="task.cacheText"
                     v-if="editStatus"
                     placeholder="请输入待执行任务"
                     clearable>
                   </el-input> 
-                  <span style="font-size: 24px;">{{ task.text }}</span>
+                  <span v-else style="font-size: 24px;">{{ task.text }}</span>
                 </span>
                 <span>
-                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;"></i>
-                  <i class="icon el-icon-delete-solid" style="margin-right: 15px; cursor: pointer;font-size:20px;" ></i>
+                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="changeTaskStatus(editStatus)"></i>
+                  <i class="icon el-icon-delete-solid" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="removeTask(index)"></i>
                   <i v-show="!task.checked" class="icon el-icon-check" style="cursor: pointer;font-size:20px;" @click="updateTaskStatus(task)"></i>
                 </span>
               </li>
@@ -65,6 +65,7 @@ const add = tasks => {
     if ( taskText.length ) {
       tasks.unshift({
         text: taskText,
+        cacheText: '',
         checked: false
       })
     }
@@ -95,11 +96,40 @@ const update = tasks => {
   }
 }
 
+// 删除待办事项
+const remove = tasks => {
+  const removeTask = index => {
+    console.log(tasks, '------', index)
+    tasks.splice(index, 1)
+    console.log(tasks, 'taskstaskstasks')
+  }
+
+  return {
+    removeTask
+  }
+}
+// 编辑待办事项
+const edit = editStatus => {
+  const changeTaskStatus = () => editStatus.value = true
+
+  const updateTask = task=> {
+    task.text = task.cacheText
+  }
+
+  return {
+    changeTaskStatus,
+    updateTask
+  }
+}
+
+// 存储待办事项
+
+
 
 export default {
   name: 'Index',
   setup() {
-    const editStatus = ref(false)
+    const editStatus = ref('')
     const key = 'tasks'
     console.log(Storage, 'Storage')
     let tasks = reactive(getItem(key) || [])
@@ -108,7 +138,9 @@ export default {
       tasks,
       editStatus,
       ...add(tasks),
-      ...update(tasks)
+      ...update(tasks),
+      ...remove(tasks),
+      ...edit(editStatus)
     }
   },
   directives: {
