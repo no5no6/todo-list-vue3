@@ -11,14 +11,15 @@
               v-model="input"
               style="flex: 1"
               placeholder="请输入待执行任务"
-              clearable>
+              clearable
+              @keydown.enter="addTask">
             </el-input>
             <el-button style="width: 80px;margin-left: 20px;" type="primary" icon="el-icon-plus" @click="addTask">新增</el-button>
           </div>
         </section>
         <section class="section">
-          <el-progress :text-inside="true" :stroke-width="20" :percentage="50">
-            <span> 5 / 10</span>
+          <el-progress :text-inside="true" :stroke-width="20" :percentage="tasks.length ? finishedTask.length / tasks.length * 100 : 0">
+            <span> {{finishedTask.length}} / {{tasks.length}}</span>
           </el-progress>
         </section>
         <section class="section">
@@ -27,15 +28,20 @@
               <li class="task" v-for="(task, index) in tasks" :key="index" >
                 <span style="flex: 1;text-align: left" :class="{'finish-line': task.checked}">
                   <el-input
-                    v-model="task.cacheText"
-                    v-if="editStatus"
+                    v-if="editTask === task"
+                    v-model="task.text"
+                    :autofocus="editTask === task"
                     placeholder="请输入待执行任务"
-                    clearable>
+                    clearable
+                    @keydown.enter="updateTask(task)"
+                    @blur="updateTask(task)"
+                    @keydown.esc="cancel(task)"
+                    >
                   </el-input> 
                   <span v-else style="font-size: 24px;">{{ task.text }}</span>
                 </span>
                 <span>
-                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="changeTaskStatus(editStatus)"></i>
+                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="changeTaskStatus(task)"></i>
                   <i class="icon el-icon-delete-solid" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="removeTask(index)"></i>
                   <i v-show="!task.checked" class="icon el-icon-check" style="cursor: pointer;font-size:20px;" @click="updateTaskStatus(task)"></i>
                 </span>
@@ -52,7 +58,7 @@
 </template>
 
 <script>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 import { getItem } from '@/utils/storage'
 
@@ -65,7 +71,6 @@ const add = tasks => {
     if ( taskText.length ) {
       tasks.unshift({
         text: taskText,
-        cacheText: '',
         checked: false
       })
     }
@@ -88,7 +93,6 @@ const update = tasks => {
   const updateTaskStatus = task => {
     task.checked = !task.checked
     sortTasks()
-    console.log(tasks, 'toototototot')
   }
 
   return {
@@ -98,27 +102,52 @@ const update = tasks => {
 
 // 删除待办事项
 const remove = tasks => {
-  const removeTask = index => {
-    console.log(tasks, '------', index)
-    tasks.splice(index, 1)
-    console.log(tasks, 'taskstaskstasks')
-  }
+  const removeTask = index => tasks.splice(index, 1)
 
   return {
     removeTask
   }
 }
 // 编辑待办事项
-const edit = editStatus => {
-  const changeTaskStatus = () => editStatus.value = true
+const edit = () => {
+  let cache = ''
+  let editTask = ref(null)
+
+  const changeTaskStatus = task => {
+    editTask.value = task
+    cache = task.text
+    console.log(editTask, 'editTask',cache)
+  }
 
   const updateTask = task=> {
-    task.text = task.cacheText
+    console.log(editTask.value, 'sddssdsd')
+    if(editTask.value) {
+      task.text = task.text.trim()
+      editTask.value = null
+    }
+    
+  }
+
+  const cancel = task => {
+    console.log(cache, '12312321')
+    task.text = cache
+    editTask.value = null
   }
 
   return {
     changeTaskStatus,
-    updateTask
+    updateTask,
+    cancel,
+    editTask
+  }
+}
+
+// 处理完成/未完成数量
+const progress = tasks => {
+  const finishedTask = computed(() => tasks.filter(({checked}) => checked))
+  
+  return {
+    finishedTask
   }
 }
 
@@ -129,21 +158,23 @@ const edit = editStatus => {
 export default {
   name: 'Index',
   setup() {
-    const editStatus = ref('')
     const key = 'tasks'
     console.log(Storage, 'Storage')
     let tasks = reactive(getItem(key) || [])
     
     return {
       tasks,
-      editStatus,
       ...add(tasks),
       ...update(tasks),
       ...remove(tasks),
-      ...edit(editStatus)
+      ...edit(),
+      ...progress(tasks)
     }
   },
   directives: {
+    // inputFocus: (el) => {
+    //   el.focus()
+    // }
   }
 }
 </script>
