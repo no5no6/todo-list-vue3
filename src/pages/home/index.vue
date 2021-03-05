@@ -32,7 +32,6 @@
                     v-model="task.text"
                     :autofocus="editTask === task"
                     placeholder="请输入待执行任务"
-                    clearable
                     @keydown.enter="updateTask(task)"
                     @blur="updateTask(task)"
                     @keydown.esc="cancel(task)"
@@ -41,7 +40,7 @@
                   <span v-else style="font-size: 24px;">{{ task.text }}</span>
                 </span>
                 <span>
-                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="changeTaskStatus(task)"></i>
+                  <i v-show="!task.checked" class="icon el-icon-edit" style="margin-right: 15px; margin-left: 20px; cursor: pointer;font-size:20px;" @click="changeTaskStatus(task)"></i>
                   <i class="icon el-icon-delete-solid" style="margin-right: 15px; cursor: pointer;font-size:20px;" @click="removeTask(index)"></i>
                   <i v-show="!task.checked" class="icon el-icon-check" style="cursor: pointer;font-size:20px;" @click="updateTaskStatus(task)"></i>
                 </span>
@@ -121,15 +120,16 @@ const edit = () => {
 
   const updateTask = task=> {
     console.log(editTask.value, 'sddssdsd')
-    if(editTask.value) {
+    if(editTask.value && editTask.value.text) {
       task.text = task.text.trim()
       editTask.value = null
+    }else {
+      cancel(task)
     }
-    
   }
 
   const cancel = task => {
-    console.log(cache, '12312321')
+    console.log(cache, '12312321', task)
     task.text = cache
     editTask.value = null
   }
