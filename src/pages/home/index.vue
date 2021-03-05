@@ -110,6 +110,7 @@ const remove = tasks => {
 // 编辑待办事项
 const edit = () => {
   let cache = ''
+  // rective 创建的对象，直接覆盖对象不是响应式，所以此处使用 ref
   let editTask = ref(null)
 
   const changeTaskStatus = task => {
