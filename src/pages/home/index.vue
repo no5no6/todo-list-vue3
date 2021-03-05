@@ -51,15 +51,15 @@
       </article>
     </el-main>
     <el-footer>
-      我是底部
+      vue 3.0 todo-list
     </el-footer>
   </el-container>
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watchEffect } from 'vue'
 
-import { getItem } from '@/utils/storage'
+import { getItem, setItem } from '@/utils/storage'
 
 // 添加待办事项
 const add = tasks => {
@@ -152,15 +152,22 @@ const progress = tasks => {
 }
 
 // 存储待办事项
+const cacheStorage = () => {
+  const key = 'tasks'
+  let tasks = reactive(getItem(key) || [])
 
+  watchEffect(() => {
+    setItem(key, tasks)
+  })
+
+  return tasks
+}
 
 
 export default {
   name: 'Index',
   setup() {
-    const key = 'tasks'
-    console.log(Storage, 'Storage')
-    let tasks = reactive(getItem(key) || [])
+    let tasks = cacheStorage()
     
     return {
       tasks,
