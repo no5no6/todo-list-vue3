@@ -116,11 +116,9 @@ const edit = () => {
   const changeTaskStatus = task => {
     editTask.value = task
     cache = task.text
-    console.log(editTask, 'editTask',cache)
   }
 
   const updateTask = task=> {
-    console.log(editTask.value, 'sddssdsd')
     if(editTask.value && editTask.value.text) {
       task.text = task.text.trim()
       editTask.value = null
@@ -130,7 +128,6 @@ const edit = () => {
   }
 
   const cancel = task => {
-    console.log(cache, '12312321', task)
     task.text = cache
     editTask.value = null
   }
